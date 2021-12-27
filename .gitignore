@@ -48,3 +48,6 @@ jspm_packages/
 # IDE
 .idea
 .vscode
+
+dist
+.parcel-cache

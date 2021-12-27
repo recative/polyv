@@ -1,5 +1,3 @@
-import Promise from 'jraiser/promise/1.2/promise';
-
 // 列表类型
 const LIST_TYPE = {
   WAITING_LIST: 'waitingList',

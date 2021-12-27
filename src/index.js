@@ -1,4 +1,3 @@
-import Promise from 'jraiser/promise/1.2/promise';
 import PubSub from 'jraiser/pubsub/1.2/pubsub';
 
 import UploadManager from './upload';
@@ -143,7 +142,7 @@ class PlvVideoUpload extends PubSub {
           filename: fileData.title,
         }
       });
-      return null;
+      throw new Error('Uploading duplicate file');
     }
 
     // 拦截文件类型不在acceptedMimeType中的文件
@@ -155,11 +154,12 @@ class PlvVideoUpload extends PubSub {
           filename: fileData.title
         }
       });
-      return null;
+      throw new TypeError('Unacceptable file type');
     }
 
     this.fileQueue.enqueue(fileData);
     const uploader = new UploadManager(this.userData, fileData, events, this.config);
+
     if (this.status === STATUS.NOT_STARTED) {
       this.waitQueue.enqueue(uploader);
     } else {
@@ -286,7 +286,7 @@ class PlvVideoUpload extends PubSub {
     for (let i = 0; i < uploadPromiseList.length; i++) {
       uploadPromiseList[i]
         .then(res => {
-          if (!res || !res.code) {
+          if (!res || !res.status) {
             return;
           }
           this._handleUploadStatusChange(res);
@@ -299,8 +299,8 @@ class PlvVideoUpload extends PubSub {
 
   // 文件上传状态发生改变
   _handleUploadStatusChange(res) {
-    const data = res.data;
-    switch (res.code) {
+    const data = res.json();
+    switch (res.status) {
       case 100: { // 完成上传
         this.waitQueue.remove(data.id);
         break;

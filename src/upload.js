@@ -1,5 +1,5 @@
-import OSS from 'ali-oss/dist/aliyun-oss-sdk.min';
-import Promise from 'jraiser/promise/1.2/promise';
+import OSS from 'ali-oss';
+import isNode from 'is-node';
 import PubSub from 'jraiser/pubsub/1.2/pubsub';
 
 import {
@@ -78,77 +78,76 @@ class UploadManager extends PubSub {
 
     const { userData, fileData } = this;
 
-    return initUpload(userData, fileData).then(res => {
-      const data = res.data;
+    return initUpload(userData, fileData)
+      .then(async (res) => {
+        const data = (await res.json()).data;
+        return { res, data };
+      })
+      .then(({ res, data }) => {
+        // 上传失败
+        if (res.status !== 200) {
+          this._emitFileFailed({
+            code: res.status,
+            message: res.message,
+            type: 'InitUploadError',
+          });
+          throw data;
+        }
 
-      // 上传失败
-      if (res.code !== 200) {
-        this._emitFileFailed({
-          code: res.code,
-          message: res.message,
-          type: 'InitUploadError',
+        // 用户剩余空间不足
+        if (fileData.size > data.remainSpace) {
+          return Promise.resolve({
+            data: {
+              id: this.id,
+              uploader: this
+            },
+            code: 102,
+            message: '您的剩余空间不足，请及时联系客服升级空间'
+          });
+        }
+
+        this.fileData.vid = data.vid;
+
+        /**
+       * 触发上传开始事件
+       * @fires UploadManager#FileStarted
+       */
+        this.trigger('FileStarted', {
+          uploaderid: this.id,
+          fileData
         });
+
+        const filename = fileData.file.name;
+        const callback = JSON.parse(data.callback || 'null');
+
+        this.ossConfig = generateOssConfig(data);
+        // 上传到OSS的name
+        this.filenameOss = data.dir + data.vid + filename.substring(filename.lastIndexOf('.'));
+        // 上传回调
+        this.callbackBody = {
+          url: callback.callbackUrl,
+          body: callback.callbackBody,
+          host: callback.callbackHost
+        };
+
+        return this._multipartUpload();
+      }).catch((err) => {
+        console.error(err);
+        // 上传失败
+        this._emitFileFailed({
+          code: '',
+          message: err.message,
+          type: 'MultipartUploadError',
+        });
+        console.error(err);
         return Promise.resolve({
           data: {
             uploader: this,
           },
           code: 101,
-          message: res.message
+          message: NET_ERR
         });
-      }
-
-      // 用户剩余空间不足
-      if (fileData.size > data.remainSpace) {
-        return Promise.resolve({
-          data: {
-            id: this.id,
-            uploader: this
-          },
-          code: 102,
-          message: '您的剩余空间不足，请及时联系客服升级空间'
-        });
-      }
-
-      this.fileData.vid = data.vid;
-
-      /**
-       * 触发上传开始事件
-       * @fires UploadManager#FileStarted
-       */
-      this.trigger('FileStarted', {
-        uploaderid: this.id,
-        fileData
       });
-
-      const filename = fileData.file.name;
-      const callback = JSON.parse(data.callback || 'null');
-
-      this.ossConfig = generateOssConfig(data);
-      // 上传到OSS的name
-      this.filenameOss = data.dir + data.vid + filename.substring(filename.lastIndexOf('.'));
-      // 上传回调
-      this.callbackBody = {
-        url: callback.callbackUrl,
-        body: callback.callbackBody,
-        host: callback.callbackHost
-      };
-
-      return this._multipartUpload();
-    }).catch((err) => {
-      // 上传失败
-      this._emitFileFailed({
-        code: '',
-        message: err.message,
-        type: 'MultipartUploadError',
-      });
-      return Promise.resolve({
-        data: {
-          uploader: this,
-        },
-        code: 101,
-        message: NET_ERR
-      });
-    });
   }
 
   // 分片上传
@@ -163,9 +162,10 @@ class UploadManager extends PubSub {
 
     // 断点续传
     return new Promise((resolve, reject) => {
+      const file = isNode ? this.fileData.file._parts[0] : this.fileData.file;
       this.ossClient.multipartUpload(
         this.filenameOss,
-        this.fileData.file,
+        file,
         {
           parallel: this.parallel,
           partSize: this.partSize || getPartSize(this.fileData.file.size),
@@ -184,6 +184,8 @@ class UploadManager extends PubSub {
           },
         });
       }).catch((err) => {
+        console.log('An error happened while uploading the file');
+        console.error(err);
         return this._handleMultipartUploadError(err, resolve, reject);
       });
     });
@@ -191,6 +193,7 @@ class UploadManager extends PubSub {
 
   // 处理catch到multipartUpload方法出错的情况
   _handleMultipartUploadError(err, resolve, reject) {
+    console.error(err);
     // 取消/暂停上传
     if (err.status === 0 && err.name === 'cancel') {
       if (!this.isDeleted) {
@@ -286,7 +289,7 @@ class UploadManager extends PubSub {
           });
         }
 
-        this.ossConfig = generateOssConfig(res.data);
+        this.ossConfig = generateOssConfig(res.json());
         // 返回新的promise，以便于判断所有文件上传结束
         return resolve({
           code: 106,
