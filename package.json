@@ -1,5 +1,5 @@
 {
-  "name": "@polyv/vod-upload-js-sdk",
+  "name": "@recative/polyv",
   "version": "1.2.3",
   "description": "Polyv JavaScript Upload SDK provides you with a development kit for uploading media files to Polyv Video Cloud platform.",
   "packageManager": "yarn@3.1.1",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/polyv/vod-upload-js-sdk"
+    "url": "https://github.com/recative/polyv"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -68,6 +68,9 @@
     "regenerator-runtime": "^0.13.9",
     "sass": "^1.45.1"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "externals": {
     "buffer": true
   }

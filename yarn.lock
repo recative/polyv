@@ -2129,9 +2129,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polyv/vod-upload-js-sdk@workspace:.":
+"@recative/polyv@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@polyv/vod-upload-js-sdk@workspace:."
+  resolution: "@recative/polyv@workspace:."
   dependencies:
     "@babel/core": ^7.2.0
     "@babel/plugin-proposal-class-properties": ^7.2.1
