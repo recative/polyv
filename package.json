@@ -2,6 +2,7 @@
   "name": "@polyv/vod-upload-js-sdk",
   "version": "1.2.3",
   "description": "Polyv JavaScript Upload SDK provides you with a development kit for uploading media files to Polyv Video Cloud platform.",
+  "packageManager": "yarn@3.1.1",
   "keywords": [
     "polyv",
     "video",
