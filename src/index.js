@@ -115,6 +115,20 @@ class PlvVideoUpload extends PubSub {
   }
 
   /**
+   * Upload directly, skip all the fashion things.
+   */
+  upload(file, events = {}, fileSetting = {}) {
+    const fileData = generateFileData(file, fileSetting, this.userData);
+    const uploader = new UploadManager(
+      this.userData,
+      fileData,
+      events,
+      this.config
+    );
+    return uploader.upload();
+  }
+
+  /**
    * 添加文件到文件列表
    * @param {File} file 文件对象
    * @param {

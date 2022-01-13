@@ -68,6 +68,47 @@ class UploadManager extends PubSub {
     }
   }
 
+  /**
+   * Just upload, skip all fashion things.
+   */
+  async upload() {
+    const response = await initUpload(this.userData, this.fileData);
+
+    if (response.code !== 200) {
+      const error = new Error(response.message);
+      error.name = response.code;
+      throw error;
+    }
+
+    const data = response.data;
+    this.fileData.vid = data.vid;
+
+    const filename = this.fileData.file.name;
+    const callback = JSON.parse(data.callback || 'null');
+
+    this.ossConfig = generateOssConfig(data);
+    // 上传到OSS的name
+    this.filenameOss =
+      data.dir + data.vid + filename.substring(filename.lastIndexOf('.'));
+    // 上传回调
+    this.callbackBody = {
+      url: callback.callbackUrl,
+      body: callback.callbackBody,
+      host: callback.callbackHost,
+    };
+
+    this.ossClient = new OSS(this.ossConfig);
+
+    await this.ossClient.multipartUpload(this.filenameOss, this.fileData.file, {
+      parallel: this.parallel,
+      partSize: this.partSize || getPartSize(this.fileData.file.size),
+      progress: this._updateProgress.bind(this),
+      callback: this.callbackBody,
+    });
+
+    return this.fileData;
+  }
+
   // 开始/继续文件上传
   _start() {
     if (this.statusCode === 2) { // 暂停状态
