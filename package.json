@@ -1,7 +1,7 @@
 {
   "name": "@recative/polyv",
-  "version": "1.2.3",
-  "description": "Polyv JavaScript Upload SDK provides you with a development kit for uploading media files to Polyv Video Cloud platform.",
+  "version": "1.2.5",
+  "description": "A refactored Polyv client that can upload file via `Node.js`.",
   "packageManager": "yarn@3.1.1",
   "keywords": [
     "polyv",
@@ -10,10 +10,13 @@
     "保利威",
     "视频云"
   ],
-  "source": "src/index.js",
+  "source": "src/node.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
+  "types": "dist/types.d.ts",
   "scripts": {
+    "prepack": "yarn clean && yarn build",
+    "clean": "rimraf ./dist",
     "watch": "parcel watch",
     "build": "parcel build"
   },
@@ -24,49 +27,23 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "author": "Polyv frontend team",
+  "author": "Recative Developers",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.2.0",
-    "@babel/plugin-proposal-class-properties": "^7.2.1",
-    "@babel/plugin-proposal-json-strings": "^7.2.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/plugin-syntax-import-meta": "^7.2.0",
-    "@babel/plugin-transform-runtime": "^7.6.2",
-    "@babel/preset-env": "^7.2.0",
-    "@babel/runtime-corejs2": "^7.2.0",
-    "@parcel/resolver-default": "^2.0.1",
-    "autoprefixer": "^9.4.2",
-    "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.4",
-    "babel-polyfill": "^6.26.0",
-    "cross-env": "^5.2.0",
-    "css-loader": "^2.0.0",
-    "cssnano": "^4.1.7",
-    "eslint": "^5.10.0",
-    "eslint-loader": "^2.1.1",
-    "eslint-plugin-sonarjs": "^0.2.0",
-    "html-webpack-plugin": "^3.2.0",
-    "jsdoc": "^3.5.5",
-    "parcel": "^2.0.1",
-    "postcss-loader": "^3.0.0",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
-    "stylelint": "^8.0.0",
-    "stylelint-config-recommended": "^2.1.0",
-    "stylelint-webpack-plugin": "^0.10.5"
+    "@parcel/packager-ts": "^2.2.0",
+    "@parcel/transformer-typescript-types": "^2.0.1",
+    "@types/md5": "^2.3.1",
+    "@types/node-fetch": "2.5.12",
+    "parcel": "^2.2.0",
+    "rimraf": "^3.0.2",
+    "typescript": ">=3.0.0"
   },
   "dependencies": {
-    "@babel/runtime": "^7.6.3",
     "@swc/helpers": "^0.3.2",
+    "@types/ali-oss": "^6.16.2",
     "ali-oss": "6.16.0",
-    "is-node": "^1.0.2",
-    "jraiser": "^3.1.5",
-    "localStorage": "^1.0.4",
     "md5": "^2.2.1",
-    "node-fetch": "^2.6.6",
-    "regenerator-runtime": "^0.13.9",
-    "sass": "^1.45.1"
+    "node-fetch": "^2.6.6"
   },
   "files": [
     "dist/**/*"
