@@ -1,7 +1,11 @@
 /* eslint-disable no-undef */
+import crypto from "crypto";
 import OSS from "ali-oss";
-import md5 from "md5";
 import fetch from "node-fetch";
+
+const md5 = (x: Buffer | string) => {
+  return crypto.createHash("md5").update(x).digest("base64");
+};
 
 export interface IPlvNodeUploaderConfig {
   region?: string;
