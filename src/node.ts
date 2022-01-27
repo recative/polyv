@@ -165,7 +165,7 @@ export class PlvNodeVideoUpload {
     const body = (await response.json()) as IPolyVRequest<IUploadInitData>;
     const data = body.data;
 
-    if (body.status === 'error') {
+    if (body.status === "error") {
       console.error("Unable to initialize the uploading task", data);
       const error = new Error(body.message);
       error.name = `E${body.code}`;
@@ -173,7 +173,9 @@ export class PlvNodeVideoUpload {
     }
 
     const vid = data.vid;
-    const callback = JSON.parse(data.callback || "null") as IParsedCallback | null;
+    const callback = JSON.parse(
+      data.callback || "null"
+    ) as IParsedCallback | null;
 
     if (callback === null) {
       throw new Error(`Unable to get callback url`);
