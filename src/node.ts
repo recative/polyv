@@ -91,7 +91,7 @@ export class PlvNodeVideoUpload {
   config: IPlvNodeUploaderConfig;
   userData: IUserData = {
     userid: "",
-    ptime: 0,
+    ptime: Date.now(),
     sign: "",
     hash: "",
   };
@@ -161,7 +161,7 @@ export class PlvNodeVideoUpload {
     const body = (await response.json()) as IPolyVRequest<IUploadInitData>;
     const data = body.data;
 
-    if (response.status !== 200) {
+    if (body.status === 'error') {
       console.error("Unable to initialize the uploading task", data);
       const error = new Error(body.message);
       error.name = `E${body.code}`;
